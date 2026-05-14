@@ -5,7 +5,7 @@
   "currency": "USD",
   "description": "Deepseek V4 Flash language model",
   "details": {
-    "context_length": 1048576,
+    "context_length": 256000,
     "metadata_sources": {
       "context_length": "openrouter"
     },
