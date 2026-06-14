@@ -23,16 +23,15 @@
       "$doc_preset": "llm_code_example_shell"
     }
   },
-  "name": "deepseek/deepseek-v4-pro",
-  "schema": "listing_v1",
+  "name": "deepseek/deepseek-v4-flash",
   "status": "ready",
-  "time_created": "2026-04-26T03:49:13.887871Z",
+  "time_created": "2026-04-26T03:49:13.883841Z",
   "user_access_interfaces": {
     "provider_api": {
       "access_method": "http",
       "base_url": "${API_GATEWAY_BASE_URL}/deepseek",
       "routing_key": {
-        "model": "deepseek-v4-pro"
+        "model": "deepseek-v4-flash"
       }
     }
   }
