@@ -1,0 +1,23 @@
+{
+  "parameters": {
+    "api_base_url": "https://api.deepseek.com",
+    "description": "Deepseek V4 Flash language model",
+    "details": {
+      "context_length": 1048576,
+      "metadata_sources": {
+        "context_length": "openrouter"
+      },
+      "object": "model",
+      "owned_by": "deepseek",
+      "parameter_count": null
+    },
+    "display_name": "Deepseek V4 Flash",
+    "env_api_key_name": "DEEPSEEK_API_KEY",
+    "list_price": null,
+    "offering_name": "deepseek-v4-flash",
+    "payout_price": null,
+    "provider_display_name": "DeepSeek",
+    "service_type": "llm",
+    "status": "ready"
+  }
+}
