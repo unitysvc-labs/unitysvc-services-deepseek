@@ -19,19 +19,15 @@
     "display_name": "Deepseek V4 Flash",
     "env_api_key_name": "DEEPSEEK_API_KEY",
     "list_price": {
-      "cached_input": "0",
-      "description": "Service provider charges $0.14 / $0.28 / $0.0028 per 1M input/output/cached tokens",
-      "input": "0",
-      "output": "0",
-      "type": "one_million_tokens"
+      "description": "Free (bring your own DeepSeek API key \u2014 DeepSeek charges you directly at $0.14 / $0.28 / $0.0028 per 1M input/output/cached tokens)",
+      "price": "0",
+      "type": "constant"
     },
     "offering_name": "deepseek-v4-flash",
     "payout_price": {
-      "cached_input": "0",
-      "description": "Service provider charges $0.14 / $0.28 / $0.0028 per 1M input/output/cached tokens",
-      "input": "0",
-      "output": "0",
-      "type": "one_million_tokens"
+      "description": "Free (bring your own DeepSeek API key \u2014 DeepSeek charges you directly at $0.14 / $0.28 / $0.0028 per 1M input/output/cached tokens)",
+      "price": "0",
+      "type": "constant"
     },
     "provider_display_name": "DeepSeek",
     "service_type": "llm",
