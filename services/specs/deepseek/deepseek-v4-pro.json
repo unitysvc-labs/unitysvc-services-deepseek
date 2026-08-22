@@ -1,6 +1,7 @@
 {
   "parameters": {
     "api_base_url": "https://api.deepseek.com",
+    "default_visibility": "unlisted",
     "description": "Deepseek V4 Pro language model",
     "details": {
       "context_length": 1048576,

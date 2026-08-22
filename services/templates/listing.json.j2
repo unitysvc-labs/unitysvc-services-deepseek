@@ -1,6 +1,14 @@
 {
   "status": "{{ status | default('ready') }}",
   "currency": "USD",
+  {#- Visibility the upload applies to the service. Populated per-service by
+      scripts/update_params.py from the DEFAULT_VISIBILITY env var (the org-level
+      GitHub variable); the literal fallback keeps hand-written param files and
+      local renders working when it is absent. Must stay one of
+      public | unlisted | private — the validator allowlists it. #}
+  "service_options": {
+    "default_visibility": "{{ default_visibility | default('unlisted') }}"
+  },
   {#- name = <provider>/<bare> per the platform service-naming convention
       (unitysvc PR #1196 / issue #1138). #}
   "name": "{{ provider_name }}/{{ offering_name }}",
