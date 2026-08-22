@@ -151,6 +151,11 @@ class ModelSource:
             "pricing_note": pricing_note,
             # Listing fields
             "list_price": pricing,
+            # Visibility the upload applies, from the DEFAULT_VISIBILITY GitHub
+            # variable. `or` rather than a get() default: an unset variable
+            # reaches the runner as an empty string, which would render an
+            # invalid "" visibility.
+            "default_visibility": os.environ.get("DEFAULT_VISIBILITY") or "unlisted",
             # Provider config (for templates)
             "provider_name": PROVIDER_NAME,
             "provider_display_name": PROVIDER_DISPLAY_NAME,
