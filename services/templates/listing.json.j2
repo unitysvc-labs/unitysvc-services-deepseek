@@ -13,7 +13,23 @@
       (unitysvc PR #1196 / issue #1138). #}
   "name": "{{ provider_name }}/{{ offering_name }}",
 {%- if list_price %}
-  "list_price": {{ list_price | tojson }},
+{#- Price-cell copy follows the marketplace description grammar
+    (unitysvc/unitysvc#1886, PR #1887):
+
+        <amount> [ — <PILL> ] [ | <hover note> ]
+
+    BYOK is *why* the gateway price is free, so it rides the badge slot and
+    renders as a pill beside the amount. The provider's reference rates ride
+    the `|` note: that slot is taken first and consumed to end-of-string, so
+    everything in it is inert — a rate card may contain "/" and "per" without
+    being re-parsed as a unit. The em-dash aside alone cannot express both, as
+    it is classified as EITHER a pill or prose.
+
+    Composed here rather than written into the param file because
+    scripts/update_params.py rebuilds list_price on the nightly populate run
+    and would drop a hand-edited description within a day. #}
+{%- set _rate = (' | usage is billed by ' ~ provider_display_name ~ ' directly at ' ~ pricing_note) if pricing_note else '' %}
+  "list_price": {{ dict(list_price, description='Free — BYOK' ~ _rate) | tojson }},
 {%- endif %}
   "user_access_interfaces": {
     "provider_api": {
