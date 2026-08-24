@@ -4,7 +4,7 @@
     "default_visibility": "unlisted",
     "description": "Deepseek V4 Flash language model",
     "details": {
-      "context_length": 1310720,
+      "context_length": 1048576,
       "litellm_provider": "deepseek",
       "max_input_tokens": 1000000,
       "max_output_tokens": 393216,
@@ -30,7 +30,7 @@
       "price": "0",
       "type": "constant"
     },
-    "pricing_note": "$0.14 / $0.28 / $0.0028 per 1M input/output/cached tokens",
+    "pricing_note": "$0.44 / $1.32 / $0.014 per 1M input/output/cached tokens",
     "provider_display_name": "DeepSeek",
     "service_type": "llm",
     "status": "ready"
