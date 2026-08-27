@@ -2,7 +2,7 @@
   "parameters": {
     "api_base_url": "https://api.deepseek.com",
     "default_visibility": "unlisted",
-    "description": "Deepseek V4 Pro language model",
+    "description": "Deepseek V4 Flash Vision Exp language model",
     "details": {
       "context_length": 1048576,
       "litellm_provider": "deepseek",
@@ -17,22 +17,22 @@
       "owned_by": "deepseek",
       "parameter_count": null
     },
-    "display_name": "Deepseek V4 Pro",
+    "display_name": "Deepseek V4 Flash Vision Exp",
     "env_api_key_name": "DEEPSEEK_API_KEY",
     "list_price": {
       "description": "Free (BYOK)",
       "price": "0",
       "type": "constant"
     },
-    "offering_name": "deepseek-v4-pro",
+    "offering_name": "deepseek-v4-flash-vision-exp",
     "payout_price": {
       "description": "Free (BYOK)",
       "price": "0",
       "type": "constant"
     },
-    "pricing_note": "$1.32 / $3.96 / $0.044 per 1M input/output/cached tokens",
+    "pricing_note": "$0.44 / $1.32 / $0.014 per 1M input/output/cached tokens",
     "provider_display_name": "DeepSeek",
-    "service_type": "llm",
+    "service_type": "vision_language_model",
     "status": "ready"
   }
 }
