@@ -19,6 +19,7 @@
     },
     "display_name": "Deepseek V4 Flash Vision Exp",
     "env_api_key_name": "DEEPSEEK_API_KEY",
+    "is_vision": true,
     "list_price": {
       "description": "Free (BYOK)",
       "price": "0",
