@@ -165,13 +165,26 @@ class ModelSource:
         }
 
     def _determine_service_type(self, model_id: str) -> str:
+        """Pick the offering's `service_type`.
+
+        `service_type` is a validated platform enum (ServiceTypeEnum) naming the
+        BROAD service category — the access pattern and protocol. It is not
+        where AI modalities go: vision, tools and thinking are attributes of a
+        chat call, so a vision-language model is still `llm`. The platform
+        tracks modalities on the offering's `capabilities` list instead (see
+        templates/offering.json.j2, which declares `chat`).
+
+        Returning anything outside the enum yields a param file that renders and
+        validates locally but is rejected by the upload with
+        "Unexpected value '…'. Expected one of {…}" — which is how
+        `vision_language_model` and `rerank` (neither is an enum member) broke
+        the upload after a populate run picked up deepseek-v4-flash-vision-exp.
+        The enum offers no reranker category either, so a future DeepSeek
+        reranker also lands on `llm` and declares capability `rerank`.
+        """
         model_lower = model_id.lower()
         if any(kw in model_lower for kw in ["embed", "embedding"]):
             return "embedding"
-        if any(kw in model_lower for kw in ["rerank"]):
-            return "rerank"
-        if any(kw in model_lower for kw in ["vision"]):
-            return "vision_language_model"
         return "llm"
 
     def _format_price(self, price: float) -> str:
