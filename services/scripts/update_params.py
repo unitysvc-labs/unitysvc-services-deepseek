@@ -66,6 +66,7 @@ class ModelSource:
     def _build_template_vars(self, model_id: str, model_info: dict) -> dict:
         """Build template variables for a model."""
         service_type = self._determine_service_type(model_id)
+        is_vision = self._is_vision(model_id)
         display_name = model_id.replace("-", " ").replace("_", " ").title()
 
         # Build details from LiteLLM data and model info
@@ -145,6 +146,10 @@ class ModelSource:
             "display_name": display_name,
             "description": f"{display_name} language model",
             "service_type": service_type,
+            # Drives the offering's second capability and the listing's
+            # image-aware code examples. Kept as an explicit param rather than
+            # re-derived in the template so both read the same decision.
+            "is_vision": is_vision,
             "status": "ready",
             "details": details,
             "payout_price": pricing,
@@ -186,6 +191,18 @@ class ModelSource:
         if any(kw in model_lower for kw in ["embed", "embedding"]):
             return "embedding"
         return "llm"
+
+    def _is_vision(self, model_id: str) -> bool:
+        """Does this model accept images alongside the text prompt?
+
+        DeepSeek's `/models` carries no modality field, so the id is the only
+        signal — `deepseek-v4-flash-vision-exp` is the first such model. A
+        false negative costs the `image-text-to-text` capability and its
+        examples; a false positive would declare a capability the model
+        cannot serve, and the image-bearing probe would fail the upload,
+        which is the safer direction to be wrong in.
+        """
+        return "vision" in model_id.lower()
 
     def _format_price(self, price: float) -> str:
         """Format price without trailing .0 for whole numbers."""
