@@ -19,6 +19,7 @@
     },
     "display_name": "Deepseek V4 Pro",
     "env_api_key_name": "DEEPSEEK_API_KEY",
+    "is_vision": false,
     "list_price": {
       "description": "Free (BYOK)",
       "price": "0",

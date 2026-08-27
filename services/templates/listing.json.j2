@@ -51,7 +51,7 @@
       replace one it generated, by title. DeepSeek needs none. -#}
   "documents": {
     "$llm_example_collection": {
-      "capabilities": ["chat"],
+      "capabilities": {{ (["chat", "image-text-to-text"] if is_vision else ["chat"]) | tojson }},
       {#- The gateway exposes this OpenAI upstream in both dialects via the
           llm_translator, so callers may send either. -#}
       "formats": ["openai", "anthropic"],
