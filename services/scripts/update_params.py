@@ -7,6 +7,7 @@ Yields model dictionaries that are rendered using Jinja2 templates.
 Usage: python scripts/update_services.py
 """
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -24,6 +25,7 @@ API_BASE_URL = "https://api.deepseek.com"
 ENV_API_KEY_NAME = "DEEPSEEK_API_KEY"
 
 SCRIPT_DIR = Path(__file__).parent
+SPECS_DIR = SCRIPT_DIR.parent / "specs"
 
 
 class ModelSource:
@@ -36,8 +38,16 @@ class ModelSource:
 
     def iter_models(self) -> Iterator[dict]:
         """Yield model dictionaries for template rendering."""
-        # Fetch LiteLLM data once
+        # Fetch LiteLLM data once.  It is the only source of the upstream
+        # rate card, so an empty fetch would derive every price as null — and
+        # a null no longer overwrites the committed value (unitysvc-sellers
+        # 0.3.1), so the run would silently re-ship yesterday's rates beside
+        # today's data.  Refuse rather than publish a catalog of stale prices.
         self.litellm_data = self.data_fetcher.fetch_litellm_model_data()
+        if not self.litellm_data:
+            print("Error: LiteLLM rate data unavailable; refusing to derive "
+                  "every price as null")
+            sys.exit(1)
 
         print(f"Fetching models from {PROVIDER_DISPLAY_NAME} API...")
         try:
@@ -50,8 +60,17 @@ class ModelSource:
             models = r.json().get("data", [])
             print(f"Found {len(models)} models\n")
         except Exception as e:
+            # Exit non-zero rather than return.  An iterator that yields
+            # nothing is indistinguishable from a catalog that retired every
+            # model — and since unitysvc-sellers 0.3.1 that is no longer
+            # harmless: absence drives deprecation.  Returning 0 here writes
+            # no params, opens no PR and looks exactly like "no changes today".
             print(f"Error listing models: {e}")
-            return
+            sys.exit(1)
+
+        if not models:
+            print("Error: DeepSeek returned an empty model list")
+            sys.exit(1)
 
         for i, model_info in enumerate(models, 1):
             model_id = model_info.get("id", "")
@@ -136,10 +155,28 @@ class ModelSource:
                     f"per 1M input/output tokens"
                 )
 
+        # A rate that resolved on the last run and does not resolve now is a
+        # FAILED LOOKUP, not a model that became free.  `list_price` is
+        # nullable and nothing downstream rejects a null, and since
+        # unitysvc-sellers 0.3.1 a null yielded by the iterator no longer
+        # overwrites the committed value — so this run would keep yesterday's
+        # `pricing_note` while every other field moved on, and ship a stale
+        # rate that nobody can see is stale.  Fail here, where the model id is
+        # still in hand.
+        if pricing_note is None:
+            previous = self._committed_pricing_note(f"{PROVIDER_NAME}/{model_id}")
+            if previous:
+                print(f"Error: {model_id} has a committed rate ({previous}) but "
+                      "the LiteLLM lookup returned none this run — refusing to "
+                      "re-ship the previous price as if it were fresh")
+                sys.exit(1)
+
         return {
-            # Folder path under specs/ == listing.name == "<provider>/<model_id>"
-            # (flat layout, #1263). populate_from_iterator preserves the slash.
-            "name": f"{PROVIDER_NAME}/{model_id}",
+            # The service's name, which is also its path under specs/ ==
+            # listing.name == "<provider>/<model_id>" (flat layout, #1263).
+            # Required by write_params_from_iterator since unitysvc-sellers
+            # 0.3.1; there is no `name_field` fallback any more.
+            "service_name": f"{PROVIDER_NAME}/{model_id}",
             # Offering name is the bare upstream model_id
             "offering_name": model_id,
             # Offering fields
@@ -213,6 +250,22 @@ class ModelSource:
         """
         return "vision" in model_id.lower()
 
+    @staticmethod
+    def _committed_pricing_note(service_name: str) -> str | None:
+        """The upstream rate the last successful run recorded for this service.
+
+        Read straight from the committed param file — the same value the
+        0.3.1 writer would preserve if this run yielded ``None``.
+        """
+        path = SPECS_DIR / f"{service_name}.json"
+        if not path.is_file():
+            return None
+        try:
+            data = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError):
+            return None
+        return (data.get("parameters") or {}).get("pricing_note")
+
     def _format_price(self, price: float) -> str:
         """Format price without trailing .0 for whole numbers."""
         if price == int(price):
@@ -227,9 +280,14 @@ def main():
         sys.exit(1)
 
     source = ModelSource(api_key)
+    # `deprecate_missing` defaults to True (unitysvc-sellers 0.3.1): any
+    # committed service this run did not yield is marked deprecated.  That is
+    # correct here because the run is all-or-nothing — /v1/models is a single
+    # unpaginated call that either enumerates DeepSeek's whole catalog or
+    # exits non-zero above, and no per-model step can drop a model quietly.
     write_params_from_iterator(
         iterator=source.iter_models(),
-        output_dir=SCRIPT_DIR.parent / "specs",
+        output_dir=SPECS_DIR,
     )
 
 
