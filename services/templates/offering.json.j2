@@ -35,7 +35,28 @@
   "capabilities": {{ (["chat", "image-text-to-text"] if is_vision else ["chat"]) | tojson }},
   "status": "{{ status | default('ready') }}",
   "currency": "USD",
-  "tags": ["ai", "gateway", "byok"],
+{#- Tags come from the platform's CLOSED vocabulary (unitysvc docs/tags.yml).
+    The legacy trio — "ai", "gateway", "byok" — is gone: each one restated a
+    field the platform already derives (`service_type`, `gateway_type`, and the
+    enrollment channel named in `upstream_access_config` below), and ingest now
+    REJECTS any tag outside the vocabulary, so an upload carrying them fails
+    outright. `feature:func-call` is the only tag a seller may declare.
+
+    Emitted unconditionally for every chat model in this catalog. There is no
+    per-model signal to key on — DeepSeek's `GET /v1/models` returns only
+    `id` / `object` / `owned_by` — but the whole-catalog fact holds: DeepSeek's
+    Models & Pricing page carries a FEATURES table whose "Tool Calls" row is ✓
+    for all three published models, and those three ARE this repo's catalog
+    (specs/deepseek/: deepseek-v4-flash, deepseek-v4-pro,
+    deepseek-v4-flash-vision-exp).
+
+    The `llm` guard is the one thing standing between that claim and a wrong
+    one: `_determine_service_type` in the populator can also emit `embedding`,
+    which cannot serve a tools-bearing request. If DeepSeek ships a chat model
+    whose Tool Calls row is blank, this unconditional emission is what breaks —
+    replace it with a per-model parameter at that point, do not widen the
+    guard. -#}
+  "tags": {{ (["feature:func-call"] if service_type == "llm" else []) | tojson }},
   "details": {{ dict(details or {}, input_formats=["openai", "anthropic"], output_formats=["openai_response", "anthropic_response"]) | tojson }},
 {%- if payout_price %}
   "payout_price": {{ payout_price | tojson }},
