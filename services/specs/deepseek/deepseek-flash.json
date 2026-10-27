@@ -7,7 +7,6 @@
       "litellm_provider": "deepseek",
       "max_input_tokens": 1000000,
       "max_output_tokens": 393216,
-      "max_tokens": 393216,
       "metadata_sources": {
         "context_length": "openrouter"
       },
